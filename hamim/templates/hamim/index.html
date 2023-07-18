@@ -1,7 +1,16 @@
 {% extends "hamim/base.html" %}
 
-{% block content %}
+{% block page_header %}
   <p>HamIM analyzes your list of event frequencies for conflicting intermod 
     frequencies. All you need to do is upload a .csv file with your frequencies.
   </p>
+{% endblock page_header %}
+
+{% block content %}
+  <h2>CSV file upload</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Upload</button>
+  </form>
 {% endblock content %}
