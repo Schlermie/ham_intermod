@@ -9,11 +9,23 @@ def analyze(csv_string):
     (NOT COMPLETED YET. For now, it just returns the CSV file contents)
     """
     channel_list = csv2dict(csv_string)
-    return(channel_list)
+    unique_freqs = set(channel_list['TxFreq'] + channel_list['RxFreq'])
+    intermod_report = check_for_intermod(unique_freqs)
+    return(unique_freqs)
+
+def check_for_intermod(freqs):
+    """
+    Scan a list of frequencies to check for combinations that cause intermod
+    conflicts
+    """
+    for freq in freqs:
+        print(f"diagnostics {freq}")
+
+    return(freqs)
 
 def csv2dict(csv_string):
     """
-    Convert the CSV file to a dictionary of lists
+    Convert a CSV file in the form of a string to a dictionary of lists
     """
     data_dict = {}
 

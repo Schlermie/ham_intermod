@@ -14,7 +14,7 @@ def index(request):
             # Analyze the frequencies in the CSV file for intermod and display
             # the analysis results
             analysis_results = analyze(uploaded_file)
-            print(analysis_results)
+            # print(analysis_results)
             context = {
                 'analysis_results': analysis_results
             }
