@@ -2,5 +2,5 @@
 
 {% block content %}
   <h1>File uploaded successfully!</h1>
-  {{ analysis_results | linebreaks }}
+  {{ analysis_results | safe | linebreaks }}
 {% endblock content %}

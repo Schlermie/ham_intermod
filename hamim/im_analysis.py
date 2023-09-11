@@ -21,8 +21,7 @@ def report_unique_freqs(freq_list):
     """
     Report the list of unique frequencies found in the CSV file
     """
-    report_out  = 'Unique frequencies\n'
-    report_out += '------------------\n'
+    report_out  = '<h3><u>Unique Frequencies</u></h3>'
     for element in freq_list:
         report_out += (f"{element}\n")
     return(report_out)
@@ -45,8 +44,7 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
     Scan the list of frequencies for any 2nd order intermod hits and report
     the results.
     """
-    report_out ="\n2nd Order Intermodulation\n"
-    report_out+="-------------------------\n"
+    report_out ="\n<h3><u>2nd Order Intermodulation</u></h3>"
     analysis_freqs = append_negs_to_list_of_nums(freqs.copy()) # copy pointer
     for i in range(0, len(freqs)): # Only loop through +ve nums
         for j in range(i, len(analysis_freqs)):
@@ -71,8 +69,7 @@ def report_scores(report_out, freqs, agg_score, vic_score):
     """
     Report the total aggressor and victim scores
     """
-    report_out += (f"\nHit Scores\n")
-    report_out += (f"----------\n")
+    report_out += (f"\n<h3><u>Hit Scores</u></h3>")
     for i in range(0, len(freqs)):
         total_score = agg_score[i] + vic_score[i]
         agg_percent = agg_score[i] / sum(agg_score) * 100
