@@ -32,29 +32,53 @@ def check_for_intermod(freqs):
     Scan a list of frequencies to check for combinations that cause intermod
     conflicts
     """
-    for freq in freqs:
-        print(f"diagnostics {freq}")
-    report_out = check_for_2nd_order_intermod(freqs)
+    # for freq in freqs:
+    #     print(f"diagnostics {freq}")
+    aggressor_score = [0] * len(freqs)
+    victim_score = [0] * len(freqs)
+    report_out = check_for_2nd_order_intermod(freqs, aggressor_score, victim_score)
+    report_out = report_scores(report_out, freqs, aggressor_score, victim_score)
     return(report_out)
 
-def check_for_2nd_order_intermod(freqs):
+def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
     """
     Scan the list of frequencies for any 2nd order intermod hits and report
     the results.
     """
     report_out ="\n2nd Order Intermodulation\n"
     report_out+="-------------------------\n"
-    analysis_freqs = append_negs_to_list_of_nums(freqs)
-    for i in range(0, int(len(analysis_freqs)/2)):
+    analysis_freqs = append_negs_to_list_of_nums(freqs.copy()) # copy pointer
+    for i in range(0, len(freqs)): # Only loop through +ve nums
         for j in range(i, len(analysis_freqs)):
             f1, f2 = analysis_freqs[i], analysis_freqs[j]
-            if (f2 > 0) or (f1 > f2 * -1):
+            if (f2 > 0) or (f1 > f2 * -1): # Redundant when f2 < 0 and abs(f2) > f1
                 intermod = f1 + f2
                 report_out += (f"{f1} + {f2} = {intermod}")
                 if intermod in freqs:
                     report_out += (f" HIT\n")
+                    vic_score[freqs.index(intermod)] += 1
+                    agg_score[i] += 1
+                    if j < len(freqs):
+                        agg_score[j] += 1
+                    else:
+                        agg_score[len(analysis_freqs)-j-1] += 1
                 else:
                     report_out += (f"\n")
+    print(f"aggscore={agg_score} vicscore={vic_score}")
+    return(report_out)
+
+def report_scores(report_out, freqs, agg_score, vic_score):
+    """
+    Report the total aggressor and victim scores
+    """
+    report_out += (f"\nHit Scores\n")
+    report_out += (f"----------\n")
+    for i in range(0, len(freqs)):
+        total_score = agg_score[i] + vic_score[i]
+        agg_percent = agg_score[i] / sum(agg_score) * 100
+        vic_percent = vic_score[i] / sum(vic_score) * 100
+        total_percent = total_score / (sum(agg_score) + sum(vic_score)) * 100
+        report_out += (f"{freqs[i]}: {agg_score[i]} aggressors ({round(agg_percent)}%), {vic_score[i]} victims ({round(vic_percent)}%), TOTAL={round(total_percent)}%\n")
     return(report_out)
 
 def append_negs_to_list_of_nums(nums):
