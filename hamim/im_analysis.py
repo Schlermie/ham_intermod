@@ -37,7 +37,15 @@ def check_for_intermod(freqs):
     aggressor_score = [0] * len(freqs)
     victim_score = [0] * len(freqs)
     report_out = check_for_2nd_order_intermod(freqs, aggressor_score, victim_score)
+    report_out = check_for_3rd_order_intermod(report_out, freqs, aggressor_score, victim_score)
     report_out = report_scores(report_out, freqs, aggressor_score, victim_score)
+    return(report_out)
+
+def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
+    """
+    Scan the list of frequencies for any 3rd order intermod hits and report
+    the results.
+    """
     return(report_out)
 
 def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
