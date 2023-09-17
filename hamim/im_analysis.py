@@ -123,7 +123,10 @@ def report_scores(report_out, freqs, agg_score, vic_score):
         agg_percent = agg_score[i] / sum(agg_score) * 100
         vic_percent = vic_score[i] / sum(vic_score) * 100
         total_percent = total_score / (sum(agg_score) + sum(vic_score)) * 100
-        report_out += (f"{freqs[i]}: {agg_score[i]} aggressors ({round(agg_percent)}%), {vic_score[i]} victims ({round(vic_percent)}%), TOTAL={round(total_percent)}%\n")
+        report_out += (f"{freqs[i]}: \
+                        {agg_score[i]} aggressors ({round(agg_percent)}%), \
+                        {vic_score[i]} victims ({round(vic_percent)}%), \
+                        TOTAL={total_score} ({round(total_percent)}%)\n")
     return(report_out)
 
 def append_negs_to_list_of_nums(nums):
