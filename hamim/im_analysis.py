@@ -59,7 +59,7 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
     Scan the list of frequencies for any 3rd order intermod hits and report
     the results.
     """
-    report_out +="\n<h3><u>3rd Order Intermodulation</u></h3>"
+    report_out +="\n<h3><u>3rd Order Intermodulation Hits</u></h3>"
     analysis_freqs = append_negs_to_list_of_nums(freqs.copy()) # copy pointer
     for i in range(0, len(freqs)): # Only loop through +ve nums
         for j in range(i, len(analysis_freqs)):
@@ -67,9 +67,9 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
                 f1, f2, f3 = analysis_freqs[i], analysis_freqs[j], analysis_freqs[k]
                 if all_frequencies_kosher(f1, f2, f3):
                     intermod = f1 + f2 + f3
-                    report_out += (f"{f1} + {f2} + {f3} = {intermod}")
+                    # report_out += (f"{f1} + {f2} + {f3} = {intermod}\n")
                     if intermod in freqs:
-                        report_out += (f" HIT\n")
+                        report_out += (f"{f1} + {f2} + {f3} = {intermod}\n")
                         vic_score[freqs.index(intermod)] += 1
                         agg_score[i] += 1
                         if (abs(f2) != abs(f1)): # Don't double-count when scoring
@@ -82,9 +82,7 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
                                 agg_score[k] += 1
                             else:
                                 agg_score[len(analysis_freqs)-k-1] += 1
-                    else:
-                        report_out += (f"\n")
-    print(f"aggscore={agg_score} vicscore={vic_score}")
+    # print(f"aggscore={agg_score} vicscore={vic_score}")
     return(report_out)
 
 def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
@@ -92,16 +90,16 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
     Scan the list of frequencies for any 2nd order intermod hits and report
     the results.
     """
-    report_out ="\n<h3><u>2nd Order Intermodulation</u></h3>"
+    report_out ="\n<h3><u>2nd Order Intermodulation Hits</u></h3>"
     analysis_freqs = append_negs_to_list_of_nums(freqs.copy()) # copy pointer
     for i in range(0, len(freqs)): # Only loop through +ve nums
         for j in range(i, len(analysis_freqs)):
             f1, f2 = analysis_freqs[i], analysis_freqs[j]
             if (f2 > 0) or (f1 > f2 * -1): # Redundant when f2 < 0 and abs(f2) > f1
                 intermod = f1 + f2
-                report_out += (f"{f1} + {f2} = {intermod}")
+                # report_out += (f"{f1} + {f2} = {intermod}\n")
                 if intermod in freqs:
-                    report_out += (f" HIT\n")
+                    report_out += (f"{f1} + {f2} = {intermod}\n")
                     vic_score[freqs.index(intermod)] += 1
                     agg_score[i] += 1
                     if (abs(f2) != abs(f1)): # Don't double-count when scoring
@@ -109,9 +107,7 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
                             agg_score[j] += 1
                         else:
                             agg_score[len(analysis_freqs)-j-1] += 1
-                else:
-                    report_out += (f"\n")
-    print(f"aggscore={agg_score} vicscore={vic_score}")
+    # print(f"aggscore={agg_score} vicscore={vic_score}")
     return(report_out)
 
 def report_scores(report_out, freqs, agg_score, vic_score):
@@ -119,6 +115,9 @@ def report_scores(report_out, freqs, agg_score, vic_score):
     Report the total aggressor and victim scores
     """
     report_out += (f"\n<h3><u>Hit Scores</u></h3>")
+    if sum(agg_score) == 0:
+        report_out += (f"No intermod hits found!\n")
+        return(report_out)
     for i in range(0, len(freqs)):
         total_score = agg_score[i] + vic_score[i]
         agg_percent = agg_score[i] / sum(agg_score) * 100
