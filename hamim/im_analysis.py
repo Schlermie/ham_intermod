@@ -126,7 +126,7 @@ def report_scores(report_out, freqs, agg_score, vic_score):
         report_out += (f"{freqs[i]}: \
                         {agg_score[i]} aggressors ({round(agg_percent)}%), \
                         {vic_score[i]} victims ({round(vic_percent)}%), \
-                        TOTAL={total_score} ({round(total_percent)}%)\n")
+                        TOTAL SCORE={total_score} ({round(total_percent)}%)\n")
     return(report_out)
 
 def append_negs_to_list_of_nums(nums):
