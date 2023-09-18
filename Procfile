@@ -1,0 +1,1 @@
+web: gunicorn ham_intermod.wsgi --log-file -
