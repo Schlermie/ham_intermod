@@ -67,9 +67,16 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
                 f1, f2, f3 = analysis_freqs[i], analysis_freqs[j], analysis_freqs[k]
                 if all_frequencies_kosher(f1, f2, f3):
                     intermod = f1 + f2 + f3
-                    # report_out += (f"{f1} + {f2} + {f3} = {intermod}\n")
                     if intermod in freqs:
-                        report_out += (f"{f1} + {f2} + {f3} = {intermod}\n")
+                        report_out += (f"{f1} ")
+                        if f2 < 0: # If f2 < 0, then subtract abs(f2) in report
+                            report_out += (f"- {abs(f2)} ")
+                        else:
+                            report_out += (f"+ {f2} ")
+                        if f3 < 0: # If f3 < 0, then subtract abs(f3) in report
+                            report_out += (f"- {abs(f3)} = {intermod}\n")
+                        else:
+                            report_out += (f"+ {f3} = {intermod}\n")
                         vic_score[freqs.index(intermod)] += 1
                         agg_score[i] += 1
                         if (abs(f2) != abs(f1)): # Don't double-count when scoring
@@ -82,7 +89,6 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
                                 agg_score[k] += 1
                             else:
                                 agg_score[len(analysis_freqs)-k-1] += 1
-    # print(f"aggscore={agg_score} vicscore={vic_score}")
     return(report_out)
 
 def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
@@ -97,9 +103,12 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
             f1, f2 = analysis_freqs[i], analysis_freqs[j]
             if (f2 > 0) or (f1 > f2 * -1): # Redundant when f2 < 0 and abs(f2) > f1
                 intermod = f1 + f2
-                # report_out += (f"{f1} + {f2} = {intermod}\n")
                 if intermod in freqs:
-                    report_out += (f"{f1} + {f2} = {intermod}\n")
+                    report_out += (f"{f1} ")
+                    if f2 < 0:  # If f2 < 0, then subtract abs(f2) in report
+                        report_out += (f"- {abs(f2)} = {intermod}\n")
+                    else:
+                        report_out += (f"+ {f2} = {intermod}\n")
                     vic_score[freqs.index(intermod)] += 1
                     agg_score[i] += 1
                     if (abs(f2) != abs(f1)): # Don't double-count when scoring
@@ -107,7 +116,6 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
                             agg_score[j] += 1
                         else:
                             agg_score[len(analysis_freqs)-j-1] += 1
-    # print(f"aggscore={agg_score} vicscore={vic_score}")
     return(report_out)
 
 def report_scores(report_out, freqs, agg_score, vic_score):
