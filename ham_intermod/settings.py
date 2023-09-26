@@ -33,6 +33,8 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     # My apps
     'hamim',
+    # Third-party apps
+    'bootstrap4',
     # Standard django apps
     'django.contrib.admin',
     'django.contrib.auth',

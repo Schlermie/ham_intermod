@@ -3,5 +3,7 @@ from . import views
 app_name = 'hamim'
 urlpatterns = [
     # Home page
-    path('', views.index, name='index')
+    path('', views.index, name='index'),
+    # About page
+    path('about/', views.about, name='about')
 ]
