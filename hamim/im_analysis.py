@@ -59,7 +59,8 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
     Scan the list of frequencies for any 3rd order intermod hits and report
     the results.
     """
-    report_out +="\n<h3><u>3rd Order Intermodulation Hits</u></h3>"
+    report_out +="<h3><u>3rd Order Intermodulation Hits</u></h3>"
+    report_out += "<table>"
     analysis_freqs = append_negs_to_list_of_nums(freqs.copy()) # copy pointer
     for i in range(0, len(freqs)): # Only loop through +ve nums
         for j in range(i, len(analysis_freqs)):
@@ -68,15 +69,21 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
                 if all_frequencies_kosher(f1, f2, f3):
                     intermod = f1 + f2 + f3
                     if intermod in freqs:
-                        report_out += (f"{f1} ")
+                        report_out += (f"<tr><td>{f1}</td>")
                         if f2 < 0: # If f2 < 0, then subtract abs(f2) in report
-                            report_out += (f"- {abs(f2)} ")
-                        else:
-                            report_out += (f"+ {f2} ")
+                            report_out += (f"<td><center>-</center></td> \
+                                           <td>{abs(f2)}</td>")
+                        else:      # else add f2
+                            report_out += (f"<td><center>+</center></td> \
+                                           <td>{f2}</td>")
                         if f3 < 0: # If f3 < 0, then subtract abs(f3) in report
-                            report_out += (f"- {abs(f3)} = {intermod}\n")
-                        else:
-                            report_out += (f"+ {f3} = {intermod}\n")
+                            report_out += (f"<td><center>-</center></td> \
+                                            <td>{abs(f3)}</td><td>=</td> \
+                                            <td>{intermod}</td></tr>")
+                        else:       # else add f3
+                            report_out += (f"<td><center>+</center></td> \
+                                            <td>{f3}</td><td>=</td> \
+                                            <td>{intermod}</td></tr>")
                         vic_score[freqs.index(intermod)] += 1
                         agg_score[i] += 1
                         if (abs(f2) != abs(f1)): # Don't double-count when scoring
@@ -89,6 +96,7 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
                                 agg_score[k] += 1
                             else:
                                 agg_score[len(analysis_freqs)-k-1] += 1
+    report_out += "</table>"
     return(report_out)
 
 def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
@@ -96,7 +104,9 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
     Scan the list of frequencies for any 2nd order intermod hits and report
     the results.
     """
-    report_out ="\n<h3><u>2nd Order Intermodulation Hits</u></h3>"
+    report_out = "<h3><u>2nd Order Intermodulation Hits</u></h3>"
+    report_out += "<table>"
+    # report_out += "<th><td>1st</td><td>+/-</td><td>2nd</td><td>=</td><td>intermod</td></th>"
     analysis_freqs = append_negs_to_list_of_nums(freqs.copy()) # copy pointer
     for i in range(0, len(freqs)): # Only loop through +ve nums
         for j in range(i, len(analysis_freqs)):
@@ -104,11 +114,15 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
             if (f2 > 0) or (f1 > f2 * -1): # Redundant when f2 < 0 and abs(f2) > f1
                 intermod = f1 + f2
                 if intermod in freqs:
-                    report_out += (f"{f1} ")
+                    report_out += (f"<tr><td>{f1}</td>")
                     if f2 < 0:  # If f2 < 0, then subtract abs(f2) in report
-                        report_out += (f"- {abs(f2)} = {intermod}\n")
-                    else:
-                        report_out += (f"+ {f2} = {intermod}\n")
+                        report_out += (f"<td><center>-</center></td> \
+                                        <td>{abs(f2)}</td><td>=</td> \
+                                        <td>{intermod}</td></tr>")
+                    else:        # else add f2
+                        report_out += (f"<td><center>+</center></td> \
+                                        <td>{f2}</td><td>=</td> \
+                                        <td>{intermod}</td></tr>")
                     vic_score[freqs.index(intermod)] += 1
                     agg_score[i] += 1
                     if (abs(f2) != abs(f1)): # Don't double-count when scoring
@@ -116,6 +130,7 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
                             agg_score[j] += 1
                         else:
                             agg_score[len(analysis_freqs)-j-1] += 1
+    report_out += "</table>"
     return(report_out)
 
 def report_scores(report_out, freqs, agg_score, vic_score):
@@ -126,16 +141,19 @@ def report_scores(report_out, freqs, agg_score, vic_score):
     if sum(agg_score) == 0:
         report_out += (f"No intermod hits found!\n")
         return(report_out)
+    report_out += "<table>"
     for i in range(0, len(freqs)):
         total_score = agg_score[i] + vic_score[i]
         agg_percent = agg_score[i] / sum(agg_score) * 100
         vic_percent = vic_score[i] / sum(vic_score) * 100
         total_percent = total_score / (sum(agg_score) + sum(vic_score)) * 100
         if total_score > 0:     # Only print hit score if total_score > 0
-            report_out += (f"{freqs[i]}: \
-                            {agg_score[i]} aggressors ({round(agg_percent)}%), \
-                            {vic_score[i]} victims ({round(vic_percent)}%), \
-                            TOTAL SCORE={total_score} ({round(total_percent)}%)\n")
+            report_out += (f"<tr><td>{freqs[i]}:</td> \
+                            <td>{agg_score[i]} aggressors ({round(agg_percent)}%),</td> \
+                            <td>{vic_score[i]} victims ({round(vic_percent)}%),</td> \
+                            <td>TOTAL SCORE=</td> \
+                            <td align='right'>{total_score} ({round(total_percent)}%)</td></tr>")
+    report_out += "</table>"
     return(report_out)
 
 def append_negs_to_list_of_nums(nums):
