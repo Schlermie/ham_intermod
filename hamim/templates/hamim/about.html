@@ -2,14 +2,23 @@
 
 {% block page_header %} 
   <div class="jumbotron">
-    <h1 class="display-3">About HamIM</h1>
+    <h1 class="display-3">How to run HamIM</h1>
     <p class="lead">
-      A webapp to compute intermodulation frequency distortion conflicts, given
-      a list of radio frequencies to be used at an event.</p>
+      HamIM is a webapp to compute intermodulation distortion (IMD)
+      conflicts, given a list of radio frequencies to be used at an event.</p>
     <p class="lead">
-      [Reserved for instructions on how to run HamIM.]</p>
-    <p class="lead">
-      HamIM Version: Sep 25, 2023</p>
+      The only input is a CSV file with two columns listing the frequencies
+      planned for your event. The column headers must include "RxFreq" and
+      "TxFreq" for your receiving and transmitting frequencies, respectively.
+      Any other columns will be ignored. In the example below, the column
+      labeled "Label" will be ignored.
+      <center><figure class="figure">
+        <img src="https://i.ibb.co/Zzwcs6v/CSVExample.png" class="shadow mb-2">
+        <figcaption class="figure-caption">Example CSV file</figcaption>
+      </figure></center>
+    </p>
+    <p>
+      HamIM Version: Sep 28, 2023</p>
     <p class="small">
       Send questions and comments to: <i>Scott.Bordelon@gmail.com</i>
     </p>

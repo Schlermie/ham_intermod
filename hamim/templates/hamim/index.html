@@ -1,16 +1,20 @@
 {% extends "hamim/base.html" %}
 
 {% block page_header %}
-  <p>HamIM analyzes your list of event frequencies for conflicting intermod 
-    frequencies. All you need to do is upload a .csv file with your frequencies.
-  </p>
+  <div class="jumbotron">
+    <h1 class="display-3">Find your IMD.</h1>
+    <p class="lead">HamIM analyzes your list of radio frequencies for potential
+      intermod distortion (IMD). All you need to do is upload a .csv file with
+      your frequencies.
+    </p>
+  </div>
 {% endblock page_header %}
 
 {% block content %}
-  <h2>CSV file upload</h2>
+  <h5>CSV file upload</h5>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Upload</button>
+    <button type="submit" class="btn btn-primary">Upload</button>
   </form>
 {% endblock content %}
