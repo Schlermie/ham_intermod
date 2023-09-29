@@ -31,8 +31,6 @@ def check_for_intermod(freqs):
     Scan a list of frequencies to check for combinations that cause intermod
     conflicts
     """
-    # for freq in freqs:
-    #     print(f"diagnostics {freq}")
     aggressor_score = [0] * len(freqs)
     victim_score = [0] * len(freqs)
     report_out = check_for_2nd_order_intermod(freqs, aggressor_score, victim_score)
@@ -106,7 +104,6 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
     """
     report_out = "<h3><u>2nd Order Intermodulation Hits</u></h3>"
     report_out += "<table>"
-    # report_out += "<th><td>1st</td><td>+/-</td><td>2nd</td><td>=</td><td>intermod</td></th>"
     analysis_freqs = append_negs_to_list_of_nums(freqs.copy()) # copy pointer
     for i in range(0, len(freqs)): # Only loop through +ve nums
         for j in range(i, len(analysis_freqs)):
