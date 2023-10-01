@@ -2,6 +2,8 @@
 # Analyze a CSV file of frequencies for intermod conflicts.
 #
 
+from ham_intermod.objects import Freq
+
 def analyze(csv_string):
     """
     Analyze the list of frequencies in the CSV file for intermod
@@ -134,22 +136,37 @@ def report_scores(report_out, freqs, agg_score, vic_score):
     """
     Report the total aggressor and victim scores
     """
+    
+    #
+    # Report no intermod hits if there are no aggressors
+    #
     report_out += (f"\n<h3><u>Hit Scores</u></h3>")
     if sum(agg_score) == 0:
         report_out += (f"No intermod hits found!\n")
         return(report_out)
+    #
+    # Else total the aggressor and victim scores for each frequency and sort
+    # the list by total score.
+    #
+    freqs_unsorted = []
+    freqs_sorted_by_tot_score = []
     report_out += "<table>"
     for i in range(0, len(freqs)):
         total_score = agg_score[i] + vic_score[i]
-        agg_percent = agg_score[i] / sum(agg_score) * 100
-        vic_percent = vic_score[i] / sum(vic_score) * 100
-        total_percent = total_score / (sum(agg_score) + sum(vic_score)) * 100
-        if total_score > 0:     # Only print hit score if total_score > 0
-            report_out += (f"<tr><td>{freqs[i]}:</td> \
-                            <td>{agg_score[i]} aggressors ({round(agg_percent)}%),</td> \
-                            <td>{vic_score[i]} victims ({round(vic_percent)}%),</td> \
+        freqs_unsorted.append(Freq(freqs[i], agg_score[i], vic_score[i], total_score))
+
+    freqs_sorted_by_tot_score = sorted(freqs_unsorted, key=lambda x: x.total_score, reverse=True)
+
+    for i in range(0, len(freqs_sorted_by_tot_score)):
+        agg_percent = freqs_sorted_by_tot_score[i].aggressor_score / sum(agg_score) * 100
+        vic_percent = freqs_sorted_by_tot_score[i].victim_score / sum(vic_score) * 100
+        total_percent = freqs_sorted_by_tot_score[i].total_score / (sum(agg_score) + sum(vic_score)) * 100
+        if freqs_sorted_by_tot_score[i].total_score > 0:     # Only print hit score if total_score > 0
+            report_out += (f"<tr><td>{freqs_sorted_by_tot_score[i].frequency}:</td> \
+                            <td>{freqs_sorted_by_tot_score[i].aggressor_score} aggressors ({round(agg_percent)}%),</td> \
+                            <td>{freqs_sorted_by_tot_score[i].victim_score} victims ({round(vic_percent)}%),</td> \
                             <td>TOTAL SCORE=</td> \
-                            <td align='right'>{total_score} ({round(total_percent)}%)</td></tr>")
+                            <td align='right'>{freqs_sorted_by_tot_score[i].total_score} ({round(total_percent)}%)</td></tr>")
     report_out += "</table>"
     return(report_out)
 
