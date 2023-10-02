@@ -11,10 +11,8 @@ def analyze(csv_string):
     (NOT COMPLETED YET. For now, it just returns the CSV file contents)
     """
     analysis_report = ""
-    channel_list = csv2dict(csv_string)
-    unique_freqs_strings = set(channel_list['TxFreq'] + channel_list['RxFreq'])
-    unique_freqs = [float(x) for x in unique_freqs_strings] # Convert to floats
-    unique_freqs.sort(reverse=True)
+    channel_dict = csv2dict(csv_string)
+    unique_freqs = channel_dict2list(channel_dict)
     analysis_report += report_unique_freqs(unique_freqs)
     analysis_report += check_for_intermod(unique_freqs)
     return(analysis_report)
@@ -204,3 +202,31 @@ def csv2dict(csv_string):
                 data_dict[header].append(row_data[i])
 
     return data_dict
+
+def channel_dict2list(channel_dict):
+    """
+    Convert the CSV dictionary of radio channel information into a list of
+    unique radio frequencies sorted in ascending order.
+    """
+    i=0
+    all_freqs = []
+    for rx_freq in channel_dict['RxFreq']:
+        offset = channel_dict['TxFreq'][i]
+        rx_freq_float = float(rx_freq)
+        match offset:
+            case "":
+                tx_freq_float = rx_freq_float
+            case "-":
+                tx_freq_float = (rx_freq_float - 0.6) if (rx_freq_float <= 148) \
+                    else (rx_freq_float - 5) 
+            case "+":
+                tx_freq_float = (rx_freq_float + 0.6) if (rx_freq_float <= 148) \
+                    else (rx_freq_float + 5)
+            case _ :
+                tx_freq_float = float(offset)
+        tx_freq_float = round(tx_freq_float, 3)
+        all_freqs.append(rx_freq_float)
+        all_freqs.append(tx_freq_float)
+        i += 1
+    unique_freqs = sorted(list(set(all_freqs)))
+    return(unique_freqs)
