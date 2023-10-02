@@ -2,6 +2,8 @@
 # Analyze a CSV file of frequencies for intermod conflicts.
 #
 
+from ham_intermod.objects import Freq
+
 def analyze(csv_string):
     """
     Analyze the list of frequencies in the CSV file for intermod
@@ -9,10 +11,8 @@ def analyze(csv_string):
     (NOT COMPLETED YET. For now, it just returns the CSV file contents)
     """
     analysis_report = ""
-    channel_list = csv2dict(csv_string)
-    unique_freqs_strings = set(channel_list['TxFreq'] + channel_list['RxFreq'])
-    unique_freqs = [float(x) for x in unique_freqs_strings] # Convert to floats
-    unique_freqs.sort(reverse=True)
+    channel_dict = csv2dict(csv_string)
+    unique_freqs = channel_dict2list(channel_dict)
     analysis_report += report_unique_freqs(unique_freqs)
     analysis_report += check_for_intermod(unique_freqs)
     return(analysis_report)
@@ -134,22 +134,37 @@ def report_scores(report_out, freqs, agg_score, vic_score):
     """
     Report the total aggressor and victim scores
     """
+    
+    #
+    # Report no intermod hits if there are no aggressors
+    #
     report_out += (f"\n<h3><u>Hit Scores</u></h3>")
     if sum(agg_score) == 0:
         report_out += (f"No intermod hits found!\n")
         return(report_out)
+    #
+    # Else total the aggressor and victim scores for each frequency and sort
+    # the list by total score.
+    #
+    freqs_unsorted = []
+    freqs_sorted_by_tot_score = []
     report_out += "<table>"
     for i in range(0, len(freqs)):
         total_score = agg_score[i] + vic_score[i]
-        agg_percent = agg_score[i] / sum(agg_score) * 100
-        vic_percent = vic_score[i] / sum(vic_score) * 100
-        total_percent = total_score / (sum(agg_score) + sum(vic_score)) * 100
-        if total_score > 0:     # Only print hit score if total_score > 0
-            report_out += (f"<tr><td>{freqs[i]}:</td> \
-                            <td>{agg_score[i]} aggressors ({round(agg_percent)}%),</td> \
-                            <td>{vic_score[i]} victims ({round(vic_percent)}%),</td> \
+        freqs_unsorted.append(Freq(freqs[i], agg_score[i], vic_score[i], total_score))
+
+    freqs_sorted_by_tot_score = sorted(freqs_unsorted, key=lambda x: x.total_score, reverse=True)
+
+    for i in range(0, len(freqs_sorted_by_tot_score)):
+        agg_percent = freqs_sorted_by_tot_score[i].aggressor_score / sum(agg_score) * 100
+        vic_percent = freqs_sorted_by_tot_score[i].victim_score / sum(vic_score) * 100
+        total_percent = freqs_sorted_by_tot_score[i].total_score / (sum(agg_score) + sum(vic_score)) * 100
+        if freqs_sorted_by_tot_score[i].total_score > 0:     # Only print hit score if total_score > 0
+            report_out += (f"<tr><td>{freqs_sorted_by_tot_score[i].frequency}:</td> \
+                            <td>{freqs_sorted_by_tot_score[i].aggressor_score} aggressors ({round(agg_percent)}%),</td> \
+                            <td>{freqs_sorted_by_tot_score[i].victim_score} victims ({round(vic_percent)}%),</td> \
                             <td>TOTAL SCORE=</td> \
-                            <td align='right'>{total_score} ({round(total_percent)}%)</td></tr>")
+                            <td align='right'>{freqs_sorted_by_tot_score[i].total_score} ({round(total_percent)}%)</td></tr>")
     report_out += "</table>"
     return(report_out)
 
@@ -187,3 +202,31 @@ def csv2dict(csv_string):
                 data_dict[header].append(row_data[i])
 
     return data_dict
+
+def channel_dict2list(channel_dict):
+    """
+    Convert the CSV dictionary of radio channel information into a list of
+    unique radio frequencies sorted in ascending order.
+    """
+    i=0
+    all_freqs = []
+    for rx_freq in channel_dict['RxFreq']:
+        offset = channel_dict['TxFreq'][i]
+        rx_freq_float = float(rx_freq)
+        match offset:
+            case "":
+                tx_freq_float = rx_freq_float
+            case "-":
+                tx_freq_float = (rx_freq_float - 0.6) if (rx_freq_float <= 148) \
+                    else (rx_freq_float - 5) 
+            case "+":
+                tx_freq_float = (rx_freq_float + 0.6) if (rx_freq_float <= 148) \
+                    else (rx_freq_float + 5)
+            case _ :
+                tx_freq_float = float(offset)
+        tx_freq_float = round(tx_freq_float, 3)
+        all_freqs.append(rx_freq_float)
+        all_freqs.append(tx_freq_float)
+        i += 1
+    unique_freqs = sorted(list(set(all_freqs)))
+    return(unique_freqs)
