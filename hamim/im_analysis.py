@@ -211,10 +211,12 @@ def channel_dict2list(channel_dict):
     i=0
     all_freqs = []
     for rx_freq in channel_dict['RxFreq']:
+        rx_freq = ''.join(rx_freq.split()) # Remove any whitespace
         offset = channel_dict['TxFreq'][i]
+        offset = ''.join(offset.split()) # Remove any whitespace
         rx_freq_float = float(rx_freq)
         match offset:
-            case "":
+            case "" | "S" | "s":
                 tx_freq_float = rx_freq_float
             case "-":
                 tx_freq_float = (rx_freq_float - 0.6) if (rx_freq_float <= 148) \
