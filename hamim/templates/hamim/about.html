@@ -1,4 +1,5 @@
-{% extends "hamim/base.html" %} 
+{% extends "hamim/base.html" %}
+{% load static %}  <!-- Load static folder with images in it. -->
 
 {% block page_header %} 
   <div class="jumbotron">
@@ -13,7 +14,7 @@
       Any other columns will be ignored. In the example below, the column
       labeled "Label" will be ignored.
       <center><figure class="figure">
-        <img src="https://i.ibb.co/Zzwcs6v/CSVExample.png" class="shadow mb-2">
+        <img src="{% static 'CSVExample.png' %}" class="shadow mb-2">
         <figcaption class="figure-caption">Example CSV file</figcaption>
       </figure></center>
     </p>

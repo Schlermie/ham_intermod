@@ -2,7 +2,7 @@
 # Analyze a CSV file of frequencies for intermod conflicts.
 #
 
-from ham_intermod.objects import Freq
+from hamim.objects import Freq
 
 def analyze(csv_string):
     """
