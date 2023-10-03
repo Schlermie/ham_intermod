@@ -1,0 +1,89 @@
+{% extends "hamim/base.html" %}
+{% load static %}  <!-- Load static folder with images in it. -->
+
+{% block page_header %} 
+  <div class="jumbotron">
+    <h1 class="display-3">How to make a CSV file</h1>
+    <p class="lead">
+      A CSV (Comma-Separated Values) file is a plain text file for storing a
+      table (rows and columns) of data. Each line in a CSV file represents a
+      row of data in your table. Every line of text in the CSV file is separated
+      by the same number of commas to represent columns of text in your table.
+    </p>
+    <p>
+      For example, say you want to create a CSV file for the following table
+      with 4 rows and 3 columns:
+      <center><table>
+        <tr>
+          <th>RxFreq</th>
+          <th>TxFreq</th>
+          <th>Label</th>
+        </tr>
+        <tr>
+          <td>145.27</td>
+          <td>-</td>
+          <td>W6ASH</td>
+        </tr>
+        <tr>
+          <td>147.485</td>
+          <td></td>
+          <td>Staging</td>
+        </tr>
+        <tr>
+          <td>144.67</td>
+          <td>446.5</td>
+          <td>Crossband Uplink</td>
+        </tr>
+      </table></center>
+      Since a CSV file is just a plain text file, there are numerous ways to
+      create it. I'll illustrate three of the most common ways.
+      <h3><u>1. Use a Text Editor</u></h3>
+      Every computer has a text editor available. <b>Notepad</b> is the default
+      text editor in Windows. MacOS has <b>TextEdit</b>. Linux has <b>vi</b>.
+      Run your favorite text editor and start typing your rows of data with
+      columns separated by commas. For the example above, you should get
+      something like this:
+      <center><figure class="figure">
+        <img src="{% static 'TE_CSVExample.png' %}" class="shadow mb-2">
+        <figcaption class="figure-caption">Example CSV File Typed into Notepad</figcaption>
+      </figure></center>
+      Note the following:<ul>
+        <li>Our table has 4 rows so our CSV file has 4 lines.</li>
+        <li>Our table has 3 columns so every row in our CSV file has 2 commas,
+          making 3 columns per row.</li>
+        <li>The first (header) line has no formatting (such as bold text).</li>
+        <li>The third line has 2 commas next to each other because the second
+          column in that row in an empty cell.</li>
+        <li>The last line has text with whitespace, "Crossband Uplink". The
+          whitespace does NOT create a new column. Columns are only separated by
+          commas.</li>
+      </ul>
+      Now save your file as a plain text file type. Do NOT save your file as a
+      file type that supports additional formatting (bold, italic, etc.) such as
+      Rich Text Format (RTF) or Word (DOC or DOCX). Either .txt or .csv are
+      common filename extensions to use, but HamIM doesn't care what filename
+      extension you use.
+      <h3><u>2. Use Microsoft Excel</u></h3>
+      If you're familiar with using <b>Microsoft Excel</b>, you can use it to
+      create a CSV file. After you type your table into <b>Excel</b>, it will
+      look something like this:
+      <center><figure class="figure">
+        <img src="{% static 'MSE_CSVExample.png' %}" class="shadow mb-2">
+        <figcaption class="figure-caption">Example CSV File Typed into Microsoft Excel</figcaption>
+      </figure></center>
+      Save your file as a "CSV (Comma delimeted) (*.csv)" file type. Do NOT
+      save it as "CSV <b>UTF-8</b> (Comma delimited) (*.csv)" or "Excel Workbook
+      (.xlsx)" or any other richly formatted file types.
+      <h3><u>3. Use Google Sheets</u></h3>
+      <b>Google Sheets</b> is like <b>Microsoft Excel</b>, except it's web-based
+      and free to use. After you type your table into <b>Sheets</b>, it will
+      look something like this:
+      <center><figure class="figure">
+        <img src="{% static 'GS_CSVExample.png' %}" class="shadow mb-2">
+        <figcaption class="figure-caption">Example CSV File Typed into Google Sheets</figcaption>
+      </figure></center>
+      Save it to your computer using the <b>File</b> pulldown menu option,
+      <b>Download > Comma Separated Values (.csv)</b>
+    </p>
+  </div>
+  {% endblock page_header %}
