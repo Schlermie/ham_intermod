@@ -5,5 +5,7 @@ urlpatterns = [
     # Home page
     path('', views.index, name='index'),
     # About page
-    path('about/', views.about, name='about')
+    path('about/', views.about, name='about'),
+    # How to Create a CSV page
+    path('makecsv/', views.makecsv, name='makecsv')
 ]
