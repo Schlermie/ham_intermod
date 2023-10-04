@@ -160,7 +160,7 @@ def report_scores(report_out, freqs, agg_score, vic_score):
         vic_percent = freqs_sorted_by_tot_score[i].victim_score / sum(vic_score) * 100
         total_percent = freqs_sorted_by_tot_score[i].total_score / (sum(agg_score) + sum(vic_score)) * 100
         if freqs_sorted_by_tot_score[i].total_score > 0:     # Only print hit score if total_score > 0
-            report_out += (f"<tr><td>{freqs_sorted_by_tot_score[i].frequency}:</td> \
+            report_out += (f"<tr><td><b>{freqs_sorted_by_tot_score[i].frequency}:</b></td> \
                             <td>{freqs_sorted_by_tot_score[i].aggressor_score} aggressors ({round(agg_percent)}%),</td> \
                             <td>{freqs_sorted_by_tot_score[i].victim_score} victims ({round(vic_percent)}%),</td> \
                             <td>TOTAL SCORE=</td> \
