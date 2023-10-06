@@ -1,0 +1,4 @@
+RxFreq,TxFreq,Label
+145.27,-,W6ASH
+147.485,,Staging
+144.67,446.5,Crossband Uplink
