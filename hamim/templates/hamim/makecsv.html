@@ -48,10 +48,12 @@
       Run your favorite text editor and start typing your rows of data with
       columns separated by commas. For the example above, you should get
       something like this:
-      <center><figure class="figure">
-        <img src="{% static 'TE_CSVExample.png' %}" class="shadow mb-2">
-        <figcaption class="figure-caption">Example CSV file typed into Notepad</figcaption>
-      </figure></center>
+      <a href="{% static 'TE_CSVExample.txt' %}" download>
+        <center><figure class="figure">
+          <img src="{% static 'TE_CSVExample.png' %}" class="shadow mb-2">
+          <figcaption class="figure-caption">Example CSV file typed into Notepad</figcaption>
+        </figure></center>
+      </a>
       Note the following:<ul>
         <li>Our table has 4 rows so our CSV file has 4 lines.</li>
         <li>Our table has 3 columns so every row in our CSV file has 2 commas,
@@ -75,10 +77,12 @@
       If you're familiar with using <b>Microsoft Excel</b>, you can use it to
       create a CSV file. After you type your table into <b>Excel</b>, it will
       look something like this:
-      <center><figure class="figure">
-        <img src="{% static 'MSE_CSVExample.png' %}" class="shadow mb-2">
-        <figcaption class="figure-caption">Example CSV file typed into Microsoft Excel</figcaption>
-      </figure></center>
+      <a href="{% static 'MSE_CSVExample.csv' %}" download>
+        <center><figure class="figure">
+          <img src="{% static 'MSE_CSVExample.png' %}" class="shadow mb-2">
+          <figcaption class="figure-caption">Example CSV file typed into Microsoft Excel</figcaption>
+        </figure></center>
+      </a>
       Save your file as a "CSV (Comma delimeted) (*.csv)" file type. Do NOT
       save it as "CSV <b>UTF-8</b> (Comma delimited) (*.csv)" or "Excel Workbook
       (.xlsx)" or any other richly formatted file types.
@@ -87,10 +91,12 @@
       <a href="https://www.google.com/sheets/about/" target="_blank"><b>Google Sheets</b></a> is like <b>Microsoft Excel</b>, except it's web-based
       and free to use. After you type your table into <b>Sheets</b>, it will
       look something like this:
-      <center><figure class="figure">
-        <img src="{% static 'GS_CSVExample.png' %}" class="shadow mb-2">
-        <figcaption class="figure-caption">Example CSV file typed into Google Sheets</figcaption>
-      </figure></center>
+      <a href="https://docs.google.com/spreadsheets/d/1E6z3Cu7F_1yOD7d9okivmpojH4vMWKNkWvv55VAKxNs/edit?usp=sharing" target="_blank">
+        <center><figure class="figure">
+          <img src="{% static 'GS_CSVExample.png' %}" class="shadow mb-2">
+          <figcaption class="figure-caption">Example CSV file typed into Google Sheets</figcaption>
+        </figure></center>
+      </a>
       Save it to your computer using the <b>File</b> pulldown menu option,
       <b>Download > Comma Separated Values (.csv)</b>.
     </p>
