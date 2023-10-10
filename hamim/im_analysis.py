@@ -8,13 +8,13 @@ def analyze(csv_string):
     """
     Analyze the list of frequencies in the CSV file for intermod
     conflicts.
-    (NOT COMPLETED YET. For now, it just returns the CSV file contents)
     """
     analysis_report = ""
     channel_dict = csv2dict(csv_string)
-    unique_freqs = channel_dict2list(channel_dict)
-    analysis_report += report_unique_freqs(unique_freqs)
-    analysis_report += check_for_intermod(unique_freqs)
+    list_of_unique_freq_lists = channel_dict_to_list_of_freqlists(channel_dict)
+    for unique_freq_list in list_of_unique_freq_lists:
+        analysis_report += report_unique_freqs(unique_freq_list)
+        analysis_report += check_for_intermod(unique_freq_list)
     return(analysis_report)
 
 def report_unique_freqs(freq_list):
@@ -165,7 +165,7 @@ def report_scores(report_out, freqs, agg_score, vic_score):
                             <td>{freqs_sorted_by_tot_score[i].victim_score} victims ({round(vic_percent)}%),</td> \
                             <td>TOTAL SCORE=</td> \
                             <td align='right'>{freqs_sorted_by_tot_score[i].total_score} ({round(total_percent)}%)</td></tr>")
-    report_out += "</table>"
+    report_out += '</table><hr style="height:6px;background-color:#333;">'
     return(report_out)
 
 def append_negs_to_list_of_nums(nums):
@@ -203,13 +203,15 @@ def csv2dict(csv_string):
 
     return data_dict
 
-def channel_dict2list(channel_dict):
+def channel_dict_to_list_of_freqlists(channel_dict):
     """
-    Convert the CSV dictionary of radio channel information into a list of
-    unique radio frequencies sorted in ascending order.
+    Convert the CSV dictionary of radio channel information into a list of lists
+    of unique radio frequencies sorted in ascending order. Multiple lists are
+    created to account for all combinations of backup frequencies.
     """
     i=0
     all_freqs = []
+    list_of_freq_lists = []
     for rx_freq in channel_dict['RxFreq']:
         rx_freq = ''.join(rx_freq.split()) # Remove any whitespace
         offset = channel_dict['TxFreq'][i]
@@ -231,4 +233,7 @@ def channel_dict2list(channel_dict):
         all_freqs.append(tx_freq_float)
         i += 1
     unique_freqs = sorted(list(set(all_freqs)))
-    return(unique_freqs)
+    list_of_freq_lists.append(unique_freqs) # Just a test to see if a list of
+    list_of_freq_lists.append(unique_freqs) # freq lists will generate multiple
+    list_of_freq_lists.append(unique_freqs) # reports.
+    return(list_of_freq_lists)
