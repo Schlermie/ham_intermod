@@ -212,6 +212,8 @@ def channel_dict_to_list_of_freqlists(channel_dict):
     i=0
     all_freqs = []
     list_of_freq_lists = []
+    if 'Backups' in channel_dict.keys(): # If CSV has Backups column, process backups
+        list_of_channel_dicts = create_list_of_channel_dicts(channel_dict)
     for rx_freq in channel_dict['RxFreq']:
         rx_freq = ''.join(rx_freq.split()) # Remove any whitespace
         offset = channel_dict['TxFreq'][i]
@@ -237,3 +239,29 @@ def channel_dict_to_list_of_freqlists(channel_dict):
     list_of_freq_lists.append(unique_freqs) # freq lists will generate multiple
     list_of_freq_lists.append(unique_freqs) # reports.
     return(list_of_freq_lists)
+
+def create_list_of_channel_dicts(channel_dict):
+    """
+    Read a raw list of channels converted from the user CSV file. Convert that
+    list of channels to a list of channel lists by removing all but one backup
+    frequency found in the Backups list. If there is more than one type of
+    backup frequency, then build lists for all combinations of backup frequency
+    types.
+    """
+    channel_dict_no_backups = {}
+    backup_keys = set(channel_dict['Backups']) # Read list of backup keys from csv
+    backup_keys.remove('') # Remove empty string from list of backup keys
+    print(backup_keys)
+    for key in channel_dict.keys(): # Initialize channel list with no backups
+        channel_dict_no_backups[key] = []
+    #
+    # Copy non-backup channels to channel_dict_no_backups
+    #
+    for i, value in enumerate(channel_dict['Backups']):
+        if not(value):
+            for key in channel_dict.keys():
+                channel_dict_no_backups[key].append(channel_dict[key][i])
+    print(channel_dict_no_backups)
+
+    # return (list_of_channel_dicts)
+    return(False)
