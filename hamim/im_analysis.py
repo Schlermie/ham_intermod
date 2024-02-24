@@ -248,20 +248,190 @@ def create_list_of_channel_dicts(channel_dict):
     backup frequency, then build lists for all combinations of backup frequency
     types.
     """
-    channel_dict_no_backups = {}
+    channel_dict_keys = channel_dict.keys()
     backup_keys = set(channel_dict['Backups']) # Read list of backup keys from csv
     backup_keys.remove('') # Remove empty string from list of backup keys
-    print(backup_keys)
-    for key in channel_dict.keys(): # Initialize channel list with no backups
-        channel_dict_no_backups[key] = []
+    channel_dict_backups = initialize_dict_of_dicts_of_lists(backup_keys, channel_dict_keys)
+    channel_dict_no_backups = initialize_dict_of_lists(channel_dict_keys)
+
     #
+    # Copy backup channels to channel_dict_backups
     # Copy non-backup channels to channel_dict_no_backups
     #
-    for i, value in enumerate(channel_dict['Backups']):
-        if not(value):
-            for key in channel_dict.keys():
+    for i, backup_tag in enumerate(channel_dict['Backups']):
+        for key in channel_dict_keys: # Separate channels to backup or no backup
+            if backup_tag:
+                channel_dict_backups[backup_tag][key].append(channel_dict[key][i])
+            else:
                 channel_dict_no_backups[key].append(channel_dict[key][i])
-    print(channel_dict_no_backups)
+    print(channel_dict_backups)
+    print()
+    # list_of_backup_channel_lists = list(channel_dict_backups.values())
+    list_of_backup_channel_lists = channel_dict_backups_to_list_of_backup_channel_lists(channel_dict_backups)
+    print(list_of_backup_channel_lists)
+    print()
+    list_of_backup_combos = generate_backup_combos(list_of_backup_channel_lists)
+    for combination in list_of_backup_combos:  # Print the resulting combos
+        print(combination)
+    list_of_channels_without_backups = dict_of_lists_to_list_of_strings(channel_dict_no_backups)
+    print()
+    for channel in list_of_channels_without_backups:  # Print the resulting ch.s w/o backups
+        print(channel)
+    all_combos_of_channel_lists_w_and_wo_backups = make_all_combo_list_w_and_wo_backups(list_of_backup_combos, list_of_channels_without_backups)
+    print()
+    for channel_list in all_combos_of_channel_lists_w_and_wo_backups:  # Print the groups of channels w and wo backups
+        for channel in channel_list:
+            print(channel)
+        print()
 
+    #
+    # NEXT, NEED TO DEBUG WHY THE BACKUP CHANNELS AREN'T BEING COMBINED WITH
+    # THE NON-BACKUP CHANNELS CORRECTLY.
+    #
+        
     # return (list_of_channel_dicts)
     return(False)
+
+def make_all_combo_list_w_and_wo_backups(backup_channel_lists, chs_wo_backups):
+    """
+    Combine the backup channel combinations with the list of channels that
+    don't contain backups to create all channel lists that consider all legal
+    combinations of backup channels.
+
+    Args:
+        backup_channel_lists(list of lists): Lists of all legal combinations
+                                             of backup channel possibilities
+        chs_wo_backups(list): Lists of all the channels that aren't backups
+
+    Returns:
+        list_of_combined_lists(list of lists): A list of lists of all possible
+                    backup channel combinations combined with the list of
+                    channels that do not have backup channels. 
+    """
+    list_of_combined_lists = []
+    for backup_channel_combo in backup_channel_lists:
+        combined_list = backup_channel_combo + chs_wo_backups
+        list_of_combined_lists.append(combined_list)
+    return(list_of_combined_lists)
+
+
+def channel_dict_backups_to_list_of_backup_channel_lists(dict_of_dicts_of_lists):
+    """
+    Convert a dictionary of dictionaries of lists to a list of lists where the
+    inner list is formed by concatenating elements from each list across
+    the inner dictionaries. The outer list (corresponding to the keys of the outer
+    dictionary) is just a list of those lists.
+
+    Args:
+        dict_of_dicts_of_lists: A dictionary of dictionaries of lists
+
+    Returns:
+        list_of_lists_of_strings: A list of lists of strings
+    """
+    list_of_dicts_of_lists = list(dict_of_dicts_of_lists.values())
+    list_of_lists_of_strings = []
+    for dict_of_lists in list_of_dicts_of_lists: # Transform dicts of lists to list of lists of strings made
+                                                 # by concatenating elements from each column to create a row.
+        list_of_strings = dict_of_lists_to_list_of_strings(dict_of_lists)  
+        list_of_lists_of_strings.append(list_of_strings)
+    return(list_of_lists_of_strings)
+
+def dict_of_lists_to_list_of_strings(dict_of_lists):
+    """
+    Convert a dictionary of lists to a list of strings where the
+    strings are formed by concatenating elements from each list across
+    the dictionaries.
+
+    Args:
+        dict_of_lists: A dictionaries of lists
+
+    Returns:
+        list_of_strings: A list of strings of contatenated items from the
+                         dictionary lists.
+    """
+    delimiter = "#;#"
+    i=0
+    list_of_strings = []
+    first_key = next(iter(dict_of_lists))
+    while i < len(dict_of_lists[first_key]):
+        string = ""
+        for dict_key in dict_of_lists.keys():
+            string += f"{dict_of_lists[dict_key][i]}{delimiter}"
+        string = string[:(len(delimiter) * -1)] # Remove final delimiter string
+        list_of_strings.append(string)
+        i += 1
+    return (list_of_strings)
+
+
+def initialize_dict_of_lists(dict_keys):
+    """
+    Initialize a dictionary of lists, given a list of keys to the dictionary.
+
+    Args:
+        dict_keys (list): A list of keys for the dictionary
+
+    Returns:
+        dict_of_lists = An initialized dictionary of lists
+    """
+    dict_of_lists = {}
+    for key in dict_keys:
+        dict_of_lists[key] = []
+    return(dict_of_lists)
+
+def initialize_dict_of_dicts_of_lists(outer_dict_keys, inner_dict_keys):
+    """
+    Initialize a dictionary of dictionaries of lists, given lists of keys to the
+    outer and inner dictionaries.
+
+    Args:
+        outer_dict_keys (list): A list of keys for the outer dictionary
+        inner_dict_keys (list): A list of keys for the inner dictionary
+
+    Returns:
+        dict_of_dicts_of_lists: An initializedd dictionary of dictionaries of lists
+    """
+    dict_of_dicts_of_lists = {}
+    for outer_dict_key in outer_dict_keys:
+        dict_of_dicts_of_lists[outer_dict_key] = {}
+        for inner_dict_key in inner_dict_keys:
+            dict_of_dicts_of_lists[outer_dict_key][inner_dict_key] = []
+    return(dict_of_dicts_of_lists)
+
+def initialize_list_of_dicts_of_lists(dict_keys):
+    """
+    Initialize a list of dictionaries of lists, given a list of keys to the
+    dictionary.
+
+    Args:
+        dict_keys (list): A list of keys for the dictionary
+
+    Returns:
+        list_of_dicts_of_lists: An initializedd list of dictionaries of lists
+    """
+    list_of_dicts_of_lists = []
+    dict_of_lists = {}
+    for dict_key in dict_keys:
+        dict_of_lists[dict_key] = []
+    list_of_dicts_of_lists.append(dict_of_lists)
+    return(list_of_dicts_of_lists)
+
+def generate_backup_combos(lists_of_backup_channel_lists):
+    """
+    A recursive function that generates combinations of backup channels from N
+    variable length lists of backup channels.
+
+    Args:
+        lists_of_backup_channel_lists (list of lists of channel strings)
+
+    Returns:
+        result (list of lists of combinations of channel strings)
+    """
+    if not lists_of_backup_channel_lists:
+        return [[]]
+    
+    result = []
+    for i in range(len(lists_of_backup_channel_lists[0])):
+        for rest_of_the_outer_list in generate_backup_combos(lists_of_backup_channel_lists[1:]):
+            result.append([lists_of_backup_channel_lists[0][i]] + rest_of_the_outer_list)
+
+    return result
