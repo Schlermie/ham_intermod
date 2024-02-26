@@ -209,35 +209,34 @@ def channel_dict_to_list_of_freqlists(channel_dict):
     of unique radio frequencies sorted in ascending order. Multiple lists are
     created to account for all combinations of backup frequencies.
     """
-    i=0
-    all_freqs = []
-    list_of_freq_lists = []
     if 'Backups' in channel_dict.keys(): # If CSV has Backups column, process backups
         list_of_channel_dicts = create_list_of_channel_dicts(channel_dict)
-    for rx_freq in channel_dict['RxFreq']:
-        rx_freq = ''.join(rx_freq.split()) # Remove any whitespace
-        offset = channel_dict['TxFreq'][i]
-        offset = ''.join(offset.split()) # Remove any whitespace
-        rx_freq_float = float(rx_freq)
-        match offset:
-            case "" | "S" | "s":
-                tx_freq_float = rx_freq_float
-            case "-":
-                tx_freq_float = (rx_freq_float - 0.6) if (rx_freq_float <= 148) \
-                    else (rx_freq_float - 5) 
-            case "+":
-                tx_freq_float = (rx_freq_float + 0.6) if (rx_freq_float <= 148) \
-                    else (rx_freq_float + 5)
-            case _ :
-                tx_freq_float = float(offset)
-        tx_freq_float = round(tx_freq_float, 3)
-        all_freqs.append(rx_freq_float)
-        all_freqs.append(tx_freq_float)
-        i += 1
-    unique_freqs = sorted(list(set(all_freqs)))
-    list_of_freq_lists.append(unique_freqs) # Just a test to see if a list of
-    list_of_freq_lists.append(unique_freqs) # freq lists will generate multiple
-    list_of_freq_lists.append(unique_freqs) # reports.
+    list_of_freq_lists = []
+    for channel_dict in list_of_channel_dicts:
+        all_freqs = []
+        i=0
+        for rx_freq in channel_dict['RxFreq']:
+            rx_freq = ''.join(rx_freq.split()) # Remove any whitespace
+            offset = channel_dict['TxFreq'][i]
+            offset = ''.join(offset.split()) # Remove any whitespace
+            rx_freq_float = float(rx_freq)
+            match offset:
+                case "" | "S" | "s":
+                    tx_freq_float = rx_freq_float
+                case "-":
+                    tx_freq_float = (rx_freq_float - 0.6) if (rx_freq_float <= 148) \
+                        else (rx_freq_float - 5) 
+                case "+":
+                    tx_freq_float = (rx_freq_float + 0.6) if (rx_freq_float <= 148) \
+                        else (rx_freq_float + 5)
+                case _ :
+                    tx_freq_float = float(offset)
+            tx_freq_float = round(tx_freq_float, 3)
+            all_freqs.append(rx_freq_float)
+            all_freqs.append(tx_freq_float)
+            i += 1
+        unique_freqs = sorted(list(set(all_freqs))) # Create list of frequencies
+        list_of_freq_lists.append(unique_freqs) # Create list of frequency lists
     return(list_of_freq_lists)
 
 def create_list_of_channel_dicts(channel_dict):
@@ -284,13 +283,41 @@ def create_list_of_channel_dicts(channel_dict):
             print(channel)
         print()
 
-    #
-    # NEXT, NEED TO DEBUG WHY THE BACKUP CHANNELS AREN'T BEING COMBINED WITH
-    # THE NON-BACKUP CHANNELS CORRECTLY.
-    #
-        
-    # return (list_of_channel_dicts)
-    return(False)
+    # Convert the list of channel rows back to dictionary format with CSV
+    # headers used as keys for each CSV column.
+    list_of_channel_dict_combos = []
+    for channel_list in all_combos_of_channel_lists_w_and_wo_backups:
+        print(f"\n{channel_list}")
+        channel_dict_one_backup_combo = channel_list_to_channel_dict(channel_list, channel_dict_keys)
+        print(f"\n{channel_dict_one_backup_combo}")
+        list_of_channel_dict_combos.append(channel_dict_one_backup_combo)
+
+    return (list_of_channel_dict_combos)
+    # return(False)
+
+def channel_list_to_channel_dict(channel_list, channel_dict_keys):
+    """
+    Convert a list of channels from rows back to dictionary format with CSV
+    headers used as keys for each CSV column.
+
+    Args:
+        channel_list(list): List of channels with channel information delimited
+            by commas
+        channel_dict_keys(list): List of all the column headers from the CSV file
+
+    Returns:
+        channel_dict(dictionary of lists): A dictionary of channel information
+            for a list of channels, where the keys are defined by
+            channel_dict_keys and the values are lists of channel information.
+    """
+    delimiter = ","
+    channel_dict = initialize_dict_of_lists(channel_dict_keys)
+    channel_dict_keys_list = list(channel_dict_keys)
+    for channel in channel_list:
+        channel_data = channel.split(delimiter)
+        for i, value in enumerate(channel_data):
+            channel_dict[channel_dict_keys_list[i]].append(value)
+    return(channel_dict)
 
 def make_all_combo_list_w_and_wo_backups(backup_channel_lists, chs_wo_backups):
     """
@@ -349,7 +376,7 @@ def dict_of_lists_to_list_of_strings(dict_of_lists):
         list_of_strings: A list of strings of contatenated items from the
                          dictionary lists.
     """
-    delimiter = "#;#"
+    delimiter = ","
     i=0
     list_of_strings = []
     first_key = next(iter(dict_of_lists))
