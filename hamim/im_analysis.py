@@ -211,6 +211,9 @@ def channel_dict_to_list_of_freqlists(channel_dict):
     """
     if 'Backups' in channel_dict.keys(): # If CSV has Backups column, process backups
         list_of_channel_dicts = create_list_of_channel_dicts(channel_dict)
+    else:
+        list_of_channel_dicts = []
+        list_of_channel_dicts.append(channel_dict)
     list_of_freq_lists = []
     for channel_dict in list_of_channel_dicts:
         all_freqs = []
@@ -263,33 +266,17 @@ def create_list_of_channel_dicts(channel_dict):
                 channel_dict_backups[backup_tag][key].append(channel_dict[key][i])
             else:
                 channel_dict_no_backups[key].append(channel_dict[key][i])
-    print(channel_dict_backups)
-    print()
     # list_of_backup_channel_lists = list(channel_dict_backups.values())
     list_of_backup_channel_lists = channel_dict_backups_to_list_of_backup_channel_lists(channel_dict_backups)
-    print(list_of_backup_channel_lists)
-    print()
     list_of_backup_combos = generate_backup_combos(list_of_backup_channel_lists)
-    for combination in list_of_backup_combos:  # Print the resulting combos
-        print(combination)
     list_of_channels_without_backups = dict_of_lists_to_list_of_strings(channel_dict_no_backups)
-    print()
-    for channel in list_of_channels_without_backups:  # Print the resulting ch.s w/o backups
-        print(channel)
     all_combos_of_channel_lists_w_and_wo_backups = make_all_combo_list_w_and_wo_backups(list_of_backup_combos, list_of_channels_without_backups)
-    print()
-    for channel_list in all_combos_of_channel_lists_w_and_wo_backups:  # Print the groups of channels w and wo backups
-        for channel in channel_list:
-            print(channel)
-        print()
 
     # Convert the list of channel rows back to dictionary format with CSV
     # headers used as keys for each CSV column.
     list_of_channel_dict_combos = []
     for channel_list in all_combos_of_channel_lists_w_and_wo_backups:
-        print(f"\n{channel_list}")
         channel_dict_one_backup_combo = channel_list_to_channel_dict(channel_list, channel_dict_keys)
-        print(f"\n{channel_dict_one_backup_combo}")
         list_of_channel_dict_combos.append(channel_dict_one_backup_combo)
 
     return (list_of_channel_dict_combos)
