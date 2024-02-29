@@ -24,9 +24,17 @@ def index(request):
     return render(request, 'hamim/index.html', {'form': form})
 
 def about(request):
-    """ Tell the user something about HamIM and how to use it """
+    """ HamIM version number and contact information """
     return render(request, 'hamim/about.html')
 
 def makecsv(request):
     """ Teach the user how to make a CSV file """
     return render(request, 'hamim/makecsv.html')
+
+def basics(request):
+    """ Tell the user something about HamIM and how to use it """
+    return render(request, 'hamim/basics.html')
+
+def backups(request):
+    """ Teach the user how to manage backup channels """
+    return render(request, 'hamim/backups.html')

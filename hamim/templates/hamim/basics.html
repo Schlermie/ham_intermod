@@ -1,0 +1,37 @@
+{% extends "hamim/base.html" %}
+{% load static %}  <!-- Load static folder with images in it. -->
+
+{% block page_header %} 
+  <div class="jumbotron">
+    <h1 class="display-3">How to run HamIM</h1>
+    <p class="lead">
+      HamIM is a webapp to compute intermodulation distortion (IMD)
+      conflicts, given a list of radio frequencies to be used at an event.</p>
+    <p class="lead">
+      The only input is a CSV file with two columns listing the frequencies
+      planned for your event. The column headers must include "RxFreq" and
+      "TxFreq" for your receiving and transmitting frequencies, respectively.
+      For repeater channels, the TxFreq column can use the shorthand notation
+      "+" or "-" to indicate your repeater offset direction, and HamIM will
+      compute the transmit frequency. For simplex channels, the TxFreq column
+      can remain blank. Any other columns will be ignored. In the example below,
+      the column labeled "Label" will be ignored.
+      <a href="{% static 'CSVExample.csv' %}" download>
+        <center><figure class="figure">
+          <img src="{% static 'CSVExample.png' %}" class="shadow mb-2">
+          <figcaption class="figure-caption">Example CSV file</figcaption>
+        </figure></center>
+      </a>
+    </p>
+    <p class="lead">
+      HamIM will generate its report immediately after the CSV file is uploaded.
+      The "Hit Scores" summary at the end of the report identifies which radio
+      frequencies participated in some form of IMD, and the TOTAL SCORE indicates
+      how often they participated. Those frequencies with the highest scores
+      are the ones causing the most trouble, so those are the frequencies you
+      should focus on changing. If a frequency has a score of 0, it is not
+      included in the hit scores summary. Continue tweaking your radio
+      frequencies until there are no more identified in the list.
+    </p>
+  </div>
+  {% endblock page_header %}
