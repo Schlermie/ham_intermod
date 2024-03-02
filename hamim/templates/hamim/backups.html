@@ -3,41 +3,90 @@
 
 {% block page_header %} 
   <div class="jumbotron">
-    <h1 class="display-3">How to manage backup channels</h1>
+    <h1 class="display-3">Managing backup channels</h1>
     <p class="lead">
-      HamIM is a webapp to compute intermodulation distortion (IMD)
-      conflicts, given a list of radio frequencies to be used at an event.</p>
-    <p class="lead">
-      The only input is a CSV file with two columns listing the frequencies
-      planned for your event. The column headers must include "RxFreq" and
-      "TxFreq" for your receiving and transmitting frequencies, respectively.
-      For repeater channels, the TxFreq column can use the shorthand notation
-      "+" or "-" to indicate your repeater offset direction, and HamIM will
-      compute the transmit frequency. For simplex channels, the TxFreq column
-      can remain blank. Any other columns will be ignored. In the example below,
-      the column labeled "Label" will be ignored.
-      <a href="{% static 'CSVExample.csv' %}" download>
-        <center><figure class="figure">
-          <img src="{% static 'CSVExample.png' %}" class="shadow mb-2">
-          <figcaption class="figure-caption">Example CSV file</figcaption>
-        </figure></center>
-      </a>
+      Radio channel plans often include backup channels to serve as a redudant
+      channel alternative in case a primary channel is unusable. 
     </p>
     <p class="lead">
-      HamIM will generate its report immediately after the CSV file is uploaded.
-      The "Hit Scores" summary at the end of the report identifies which radio
-      frequencies participated in some form of IMD, and the TOTAL SCORE indicates
-      how often they participated. Those frequencies with the highest scores
-      are the ones causing the most trouble, so those are the frequencies you
-      should focus on changing. If a frequency has a score of 0, it is not
-      included in the hit scores summary. Continue tweaking your radio
-      frequencies until there are no more identified in the list.
+      When checking your channel plan for IMD, backup channels can unnecessarily
+      increase the likelihood of causing IMD because the backup channel will
+      never get used simultaneously with the primary channel. If HamIM were to
+      compute an IMD conflict caused by interaction between a primary channel
+      and it's backup, that would be a conflict that can be ignored. That might
+      not be so tragic if your plan only has a single backup channel, but
+      complex plans may have have 12 or more backup channels, dramatically
+      increasing the odds of triggering an IMD conflict that may never occur
+      in reality. One way to manage this burden is to submit numerous plans
+      into HamIM where each plan only includes a single backup or primary
+      channel. Take this channel plan for example:
+      <center><figure class="figure">
+        <img src="{% static 'CSVExample_1backup.png' %}" class="shadow mb-2">
+        <figcaption class="figure-caption">
+          Channel plan with one backup channel, Command Backup
+        </figcaption>
+      </figure></center>
     </p>
-    <p>
-      HamIM Version: Feb 27, 2024</p>
-    <p class="small">
-      Send questions and comments to:
-      <i><a href="mailto:Scott.Bordelon@gmail.com">Scott.Bordelon@gmail.com</a></i>
+    <p class="lead">
+      The channels labeled "Command Primary" and "Command Backup" will never be
+      used at the same time. You'll either be using the Primary channel or the
+      Backup channel at your event but not both at the same time. You've
+      essentially got two channel plans -- one with "Command Primary" and
+      another one with "Command Backup", so to avoid reporting IMD caused by
+      channel interactions that will never happen, split your channel plan
+      into two channel plans, and run HamIM on each. In the example, split
+      the channel plan into two plans as illustrated below:
+      <center><figure class="figure">
+        <img src="{% static 'CSVExample_1backup_split.png' %}">
+        <figcaption class="figure-caption">
+          Channel plan with one backup channel, split into two channel plans
+        </figcaption>
+      </figure></center>
     </p>
-  </div>
+    <p class="lead">
+      If your channel plan has more than one channel with corresponding backup
+      channels, you'll need to create multiple channel plans to
+      accomodate all possible combinations of backup channel options. Take for
+      example, a plan with two primary channels (Command Primary and Tactical
+      Primary), where Command Primary has a single backup channel and Tactical
+      Primary has two backup channels. To accomodate all possible combinations
+      of primary and backup channels, this plan needs to be split into six plans
+      as follows:
+    </p>
+    <center><figure class="figure">
+      <img src="{% static 'CSVExample_2primaries_split.png' %}">
+      <figcaption class="figure-caption">
+        Channel plan with two primary channels and backups, split into six channel plans
+      </figcaption>
+    </figure></center>
+    <p class="lead">
+      Note that the two potential Command channels multiplied by the three
+      potential Tactical channels, results in six derivative plans. The number
+      of derivative plans will be the total product of the number of the backup
+      channels with its primary multiplied by each other primary channel with
+      its backups in the original plan. For a plan with a large number of
+      primary and backup channels, creating the derivative plans can be a huge
+      burden.
+    </p>
+    <p class="lead">
+      HamIM will automatically generate the derivative plans and run them if you
+      indicate which channels are backups in the CSV file. Simply add a column
+      named "Backups" to the CSV file, and assign an arbitrary name to the
+      channels participating in the gang of backup channels with its primary
+      channel. In the example below, a Backups column has been added with tags
+      indicating the primary Command and Tactical channels have corresponding
+      backup channels.
+    </p>
+    <a href="{% static 'CSVExample_Backups.csv' %}" download>
+      <center><figure class="figure">
+        <img src="{% static 'CSVExample_Backups.png' %}" class="shadow mb-2">
+        <figcaption class="figure-caption">
+          Example CSV file with "Backups" column
+        </figcaption>
+      </figure></center>
+    </a>
+    <p class="lead">
+      That's all you need to do. Now just upload your new CSV file, and HamIM
+      will run all combinations of derivative channel plans.
+    </div>
   {% endblock page_header %}

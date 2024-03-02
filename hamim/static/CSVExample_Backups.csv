@@ -1,0 +1,9 @@
+RxFreq,TxFreq,Backups,Label
+145.27,-,,W6ASH
+146.115,+,,AA6BT
+444.625,+,,N6NAC
+443.275,+,Command,Command Primary
+446.5,,Command,Command Backup
+146.415,,Tactical,Tactical Primary
+146.46,,Tactical,Tactical Backup 1
+145.17,+,Tactical,Tactical Backup 2
