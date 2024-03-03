@@ -24,7 +24,6 @@ def report_unique_freqs(freq_list, frequency_label_dict):
     """
     report_out  = '<h3><u>Unique Frequencies</u></h3>'
     report_out += '<table>'
-    print (freq_list)
     for element in freq_list:
         report_out += (f"<tr><td><b>{element}:</b></td> \
                          <td>{frequency_label_dict[element]}</td></tr>")
@@ -39,7 +38,7 @@ def check_for_intermod(freqs, frequency_label_dict):
     aggressor_score = [0] * len(freqs)
     victim_score = [0] * len(freqs)
     report_out = check_for_2nd_order_intermod(freqs, aggressor_score, victim_score)
-    report_out = check_for_3rd_order_intermod(report_out, freqs, aggressor_score, victim_score)
+    report_out = check_for_3rd_order_intermod(report_out, freqs, aggressor_score, victim_score, frequency_label_dict)
     report_out = report_scores(report_out, freqs, aggressor_score, victim_score, frequency_label_dict)
     return(report_out)
 
@@ -57,7 +56,7 @@ def all_frequencies_kosher(f1, f2, f3):
         return(False)
     return(True)
 
-def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
+def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score, frequency_label_dict):
     """
     Scan the list of frequencies for any 3rd order intermod hits and report
     the results.
@@ -72,6 +71,9 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
                 if all_frequencies_kosher(f1, f2, f3):
                     intermod = f1 + f2 + f3
                     if intermod in freqs:
+                        #
+                        # Build equations in the report
+                        #
                         report_out += (f"<tr><td>{f1}</td>")
                         if f2 < 0: # If f2 < 0, then subtract abs(f2) in report
                             report_out += (f"<td><center>-</center></td> \
@@ -87,6 +89,15 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score):
                             report_out += (f"<td><center>+</center></td> \
                                             <td>{f3}</td><td>=</td> \
                                             <td>{intermod}</td></tr>")
+                        #
+                        # Now annotate labels beneath the equations in report
+                        #
+                        report_out += (f"<tr><td>{frequency_label_dict[f1]}</td>")
+                        report_out += (f"<td></td> \
+                                        <td>{frequency_label_dict[abs(f2)]}</td>")
+                        report_out += (f"<td></td> \
+                                        <td>{frequency_label_dict[abs(f3)]}</td><td></td> \
+                                        <td>{frequency_label_dict[intermod]}</td></tr>")
                         vic_score[freqs.index(intermod)] += 1
                         agg_score[i] += 1
                         if (abs(f2) != abs(f1)): # Don't double-count when scoring
