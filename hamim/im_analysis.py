@@ -11,22 +11,27 @@ def analyze(csv_string):
     """
     analysis_report = ""
     channel_dict = csv2dict(csv_string)
-    list_of_unique_freq_lists = channel_dict_to_list_of_freqlists(channel_dict)
+    list_of_unique_freq_lists, channel_label_dict = channel_dict_to_list_of_freqlists(channel_dict)
     for unique_freq_list in list_of_unique_freq_lists:
-        analysis_report += report_unique_freqs(unique_freq_list)
-        analysis_report += check_for_intermod(unique_freq_list)
+        analysis_report += report_unique_freqs(unique_freq_list, channel_label_dict)
+        analysis_report += check_for_intermod(unique_freq_list, channel_label_dict)
     return(analysis_report)
 
-def report_unique_freqs(freq_list):
+def report_unique_freqs(freq_list, frequency_label_dict):
     """
-    Report the list of unique frequencies found in the CSV file
+    Report the list of unique frequencies found in the CSV file. Include a
+    label for each frequency listed, based on the labels found in the CSV file.
     """
     report_out  = '<h3><u>Unique Frequencies</u></h3>'
+    report_out += '<table>'
+    print (freq_list)
     for element in freq_list:
-        report_out += (f"{element}\n")
+        report_out += (f"<tr><td><b>{element}:</b></td> \
+                         <td>{frequency_label_dict[element]}</td></tr>")
+    report_out += '</table>'
     return(report_out)
 
-def check_for_intermod(freqs):
+def check_for_intermod(freqs, frequency_label_dict):
     """
     Scan a list of frequencies to check for combinations that cause intermod
     conflicts
@@ -35,7 +40,7 @@ def check_for_intermod(freqs):
     victim_score = [0] * len(freqs)
     report_out = check_for_2nd_order_intermod(freqs, aggressor_score, victim_score)
     report_out = check_for_3rd_order_intermod(report_out, freqs, aggressor_score, victim_score)
-    report_out = report_scores(report_out, freqs, aggressor_score, victim_score)
+    report_out = report_scores(report_out, freqs, aggressor_score, victim_score, frequency_label_dict)
     return(report_out)
 
 def all_frequencies_kosher(f1, f2, f3):
@@ -102,7 +107,7 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
     Scan the list of frequencies for any 2nd order intermod hits and report
     the results.
     """
-    report_out = "<h3><u>2nd Order Intermodulation Hits</u></h3>"
+    report_out = "\n<h3><u>2nd Order Intermodulation Hits</u></h3>"
     report_out += "<table>"
     analysis_freqs = append_negs_to_list_of_nums(freqs.copy()) # copy pointer
     for i in range(0, len(freqs)): # Only loop through +ve nums
@@ -130,7 +135,7 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
     report_out += "</table>"
     return(report_out)
 
-def report_scores(report_out, freqs, agg_score, vic_score):
+def report_scores(report_out, freqs, agg_score, vic_score, frequency_label_dict):
     """
     Report the total aggressor and victim scores
     """
@@ -160,7 +165,8 @@ def report_scores(report_out, freqs, agg_score, vic_score):
         vic_percent = freqs_sorted_by_tot_score[i].victim_score / sum(vic_score) * 100
         total_percent = freqs_sorted_by_tot_score[i].total_score / (sum(agg_score) + sum(vic_score)) * 100
         if freqs_sorted_by_tot_score[i].total_score > 0:     # Only print hit score if total_score > 0
-            report_out += (f"<tr><td><b>{freqs_sorted_by_tot_score[i].frequency}:</b></td> \
+            report_out += (f"<tr><td><b>{freqs_sorted_by_tot_score[i].frequency}</b></td> \
+                            <td><b>({frequency_label_dict[freqs_sorted_by_tot_score[i].frequency]}):</b></td> \
                             <td>{freqs_sorted_by_tot_score[i].aggressor_score} aggressors ({round(agg_percent)}%),</td> \
                             <td>{freqs_sorted_by_tot_score[i].victim_score} victims ({round(vic_percent)}%),</td> \
                             <td>TOTAL SCORE=</td> \
@@ -208,6 +214,9 @@ def channel_dict_to_list_of_freqlists(channel_dict):
     Convert the CSV dictionary of radio channel information into a list of lists
     of unique radio frequencies sorted in ascending order. Multiple lists are
     created to account for all combinations of backup frequencies.
+
+    Return a list of frequency lists and also a dictionary that assigns a label
+    to each frequency.
     """
     if 'Backups' in channel_dict.keys(): # If CSV has Backups column, process backups
         list_of_channel_dicts = create_list_of_channel_dicts(channel_dict)
@@ -215,6 +224,7 @@ def channel_dict_to_list_of_freqlists(channel_dict):
         list_of_channel_dicts = []
         list_of_channel_dicts.append(channel_dict)
     list_of_freq_lists = []
+    channel_label_dict = {}
     for channel_dict in list_of_channel_dicts:
         all_freqs = []
         i=0
@@ -237,10 +247,16 @@ def channel_dict_to_list_of_freqlists(channel_dict):
             tx_freq_float = round(tx_freq_float, 3)
             all_freqs.append(rx_freq_float)
             all_freqs.append(tx_freq_float)
+            if 'Label' in channel_dict.keys(): # Create dictionary of labels for each frequency
+                channel_label_dict[rx_freq_float] = channel_dict['Label'][i]
+                channel_label_dict[tx_freq_float] = channel_dict['Label'][i]
+            else:
+                channel_label_dict[rx_freq_float] = ""
+                channel_label_dict[tx_freq_float] = ""
             i += 1
         unique_freqs = sorted(list(set(all_freqs))) # Create list of frequencies
         list_of_freq_lists.append(unique_freqs) # Create list of frequency lists
-    return(list_of_freq_lists)
+    return(list_of_freq_lists, channel_label_dict)
 
 def create_list_of_channel_dicts(channel_dict):
     """
