@@ -11,6 +11,14 @@
 {% endblock page_header %}
 
 {% block content %}
+  <!-- <h5>Options</h5>
+  <div class="form-check">
+    <input class="input" type="checkbox" value="" id="labelEquations">
+    <label class="label" for="labelEquations">
+      Label frequencies used in report equations?
+    </label>
+  </div>
+  <br> -->
   <h5>CSV file upload</h5>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}

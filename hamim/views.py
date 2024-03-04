@@ -10,11 +10,11 @@ def index(request):
         form = UploadFileForm(request.POST, request.FILES)
         print(form.errors.as_data())
         if form.is_valid():
+            label_equations = form.cleaned_data['label_equations']
             uploaded_file = request.FILES['file'].read().decode('utf-8')
             # Analyze the frequencies in the CSV file for intermod and display
             # the analysis results
-            analysis_results = analyze(uploaded_file)
-            # print(analysis_results)
+            analysis_results = analyze(uploaded_file, label_equations)
             context = {
                 'analysis_results': analysis_results
             }

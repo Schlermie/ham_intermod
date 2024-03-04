@@ -4,17 +4,22 @@
 
 from hamim.objects import Freq
 
-def analyze(csv_string):
+def analyze(csv_string, label_equations):
     """
     Analyze the list of frequencies in the CSV file for intermod
     conflicts.
+
+    Args:
+        csv_string (string): The user's CSV file in the form of one long string.
+        label_equations (boolean): If True, label the frequencies that appear
+                                   in the report.
     """
     analysis_report = ""
     channel_dict = csv2dict(csv_string)
     list_of_unique_freq_lists, channel_label_dict = channel_dict_to_list_of_freqlists(channel_dict)
     for unique_freq_list in list_of_unique_freq_lists:
         analysis_report += report_unique_freqs(unique_freq_list, channel_label_dict)
-        analysis_report += check_for_intermod(unique_freq_list, channel_label_dict)
+        analysis_report += check_for_intermod(unique_freq_list, channel_label_dict, label_equations)
     return(analysis_report)
 
 def report_unique_freqs(freq_list, frequency_label_dict):
@@ -30,7 +35,7 @@ def report_unique_freqs(freq_list, frequency_label_dict):
     report_out += '</table>'
     return(report_out)
 
-def check_for_intermod(freqs, frequency_label_dict):
+def check_for_intermod(freqs, frequency_label_dict, label_frequencies):
     """
     Scan a list of frequencies to check for combinations that cause intermod
     conflicts
@@ -38,7 +43,7 @@ def check_for_intermod(freqs, frequency_label_dict):
     aggressor_score = [0] * len(freqs)
     victim_score = [0] * len(freqs)
     report_out = check_for_2nd_order_intermod(freqs, aggressor_score, victim_score)
-    report_out = check_for_3rd_order_intermod(report_out, freqs, aggressor_score, victim_score, frequency_label_dict)
+    report_out = check_for_3rd_order_intermod(report_out, freqs, aggressor_score, victim_score, frequency_label_dict, label_frequencies)
     report_out = report_scores(report_out, freqs, aggressor_score, victim_score, frequency_label_dict)
     return(report_out)
 
@@ -56,7 +61,7 @@ def all_frequencies_kosher(f1, f2, f3):
         return(False)
     return(True)
 
-def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score, frequency_label_dict):
+def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score, frequency_label_dict, label_frequencies):
     """
     Scan the list of frequencies for any 3rd order intermod hits and report
     the results.
@@ -90,14 +95,16 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score, freque
                                             <td>{f3}</td><td>=</td> \
                                             <td>{intermod}</td></tr>")
                         #
-                        # Now annotate labels beneath the equations in report
+                        # Now annotate labels beneath the equations in report if
+                        # label_frequencies=True
                         #
-                        report_out += (f"<tr><td>{frequency_label_dict[f1]}</td>")
-                        report_out += (f"<td></td> \
-                                        <td>{frequency_label_dict[abs(f2)]}</td>")
-                        report_out += (f"<td></td> \
-                                        <td>{frequency_label_dict[abs(f3)]}</td><td></td> \
-                                        <td>{frequency_label_dict[intermod]}</td></tr>")
+                        if label_frequencies:
+                            report_out += (f"<tr><td>{frequency_label_dict[f1]}</td>")
+                            report_out += (f"<td></td> \
+                                            <td>{frequency_label_dict[abs(f2)]}</td>")
+                            report_out += (f"<td></td> \
+                                            <td>{frequency_label_dict[abs(f3)]}</td><td></td> \
+                                            <td>{frequency_label_dict[intermod]}</td></tr>")
                         vic_score[freqs.index(intermod)] += 1
                         agg_score[i] += 1
                         if (abs(f2) != abs(f1)): # Don't double-count when scoring
