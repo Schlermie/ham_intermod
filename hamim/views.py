@@ -10,7 +10,7 @@ def index(request):
         form = UploadFileForm(request.POST, request.FILES)
         print(form.errors.as_data())
         if form.is_valid():
-            label_equations = form.cleaned_data['label_equations']
+            label_equations = 'labeleqns' in request.POST
             uploaded_file = request.FILES['file'].read().decode('utf-8')
             # Analyze the frequencies in the CSV file for intermod and display
             # the analysis results
