@@ -17,6 +17,9 @@ def analyze(csv_string, label_equations):
     analysis_report = ""
     channel_dict = csv2dict(csv_string)
     list_of_unique_freq_lists, channel_label_dict = channel_dict_to_list_of_freqlists(channel_dict)
+    for freq in freqs: # Initialize all aggregate scores to 0 (WHERE DOES THIS BELONG?????????????)  
+        aggregate_aggressor_score[freq] = 0
+        aggregate_victim_score[freq] = 0
     for unique_freq_list in list_of_unique_freq_lists:
         analysis_report += report_unique_freqs(unique_freq_list, channel_label_dict)
         analysis_report += check_for_intermod(unique_freq_list, channel_label_dict, label_equations)
@@ -42,9 +45,16 @@ def check_for_intermod(freqs, frequency_label_dict, label_frequencies):
     """
     aggressor_score = [0] * len(freqs)
     victim_score = [0] * len(freqs)
-    report_out = check_for_2nd_order_intermod(freqs, aggressor_score, victim_score)
-    report_out = check_for_3rd_order_intermod(report_out, freqs, aggressor_score, victim_score, frequency_label_dict, label_frequencies)
-    report_out = report_scores(report_out, freqs, aggressor_score, victim_score, frequency_label_dict)
+    aggregate_aggressor_score = {}
+    aggregate_victim_score = {}
+    report_out = check_for_2nd_order_intermod(freqs, aggressor_score,
+                victim_score, aggregate_aggressor_score, aggregate_victim_score)
+    report_out = check_for_3rd_order_intermod(report_out, freqs, aggressor_score,
+                victim_score, aggregate_aggressor_score, aggregate_victim_score,
+                frequency_label_dict, label_frequencies)
+    report_out = report_scores(report_out, freqs, aggressor_score, victim_score,
+                aggregate_aggressor_score, aggregate_victim_score,
+                frequency_label_dict)
     return(report_out)
 
 def all_frequencies_kosher(f1, f2, f3):
@@ -61,7 +71,8 @@ def all_frequencies_kosher(f1, f2, f3):
         return(False)
     return(True)
 
-def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score, frequency_label_dict, label_frequencies):
+def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score,
+        agg_agg_score, agg_vic_score, frequency_label_dict, label_frequencies):
     """
     Scan the list of frequencies for any 3rd order intermod hits and report
     the results.
@@ -120,7 +131,8 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score, freque
     report_out += "</table>"
     return(report_out)
 
-def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
+def check_for_2nd_order_intermod(freqs, agg_score, vic_score, agg_agg_score,
+                                 agg_vic_score):
     """
     Scan the list of frequencies for any 2nd order intermod hits and report
     the results.
@@ -151,9 +163,16 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score):
                         else:
                             agg_score[len(analysis_freqs)-j-1] += 1
     report_out += "</table>"
+    aggregate_scores(freqs, agg_score, vic_score, agg_agg_score, agg_vic_score)
     return(report_out)
 
-def report_scores(report_out, freqs, agg_score, vic_score, frequency_label_dict):
+def aggregate_scores(freqs, agg_score, vic_score, agg_agg_score, agg_vic_score):
+    for i, freq in enumerate(freqs):
+        agg_agg_score[freq] += agg_score[i]
+        agg_vic_score[freq] += vic_score[i]
+
+def report_scores(report_out, freqs, agg_score, vic_score, agg_agg_score,
+                  agg_vic_score, frequency_label_dict):
     """
     Report the total aggressor and victim scores
     """
