@@ -17,12 +17,11 @@ def analyze(csv_string, label_equations):
     analysis_report = ""
     channel_dict = csv2dict(csv_string)
     list_of_unique_freq_lists, channel_label_dict = channel_dict_to_list_of_freqlists(channel_dict)
-    for freq in freqs: # Initialize all aggregate scores to 0 (WHERE DOES THIS BELONG?????????????)  
-        aggregate_aggressor_score[freq] = 0
-        aggregate_victim_score[freq] = 0
     for unique_freq_list in list_of_unique_freq_lists:
         analysis_report += report_unique_freqs(unique_freq_list, channel_label_dict)
-        analysis_report += check_for_intermod(unique_freq_list, channel_label_dict, label_equations)
+        analysis_report, aggregate_aggressor_score, aggregate_victim_score = \
+            check_for_intermod(unique_freq_list, channel_label_dict, label_equations)
+    analysis_report = report_aggregate_scores(analysis_report, aggregate_aggressor_score, aggregate_victim_score)
     return(analysis_report)
 
 def report_unique_freqs(freq_list, frequency_label_dict):
@@ -47,15 +46,21 @@ def check_for_intermod(freqs, frequency_label_dict, label_frequencies):
     victim_score = [0] * len(freqs)
     aggregate_aggressor_score = {}
     aggregate_victim_score = {}
+    # Initialize aggregate scores to 0 for this set of freqs if not yet
+    # initialized previously while working on some other set of freqs.
+    for freq in freqs:
+        if freq not in aggregate_aggressor_score:
+            aggregate_aggressor_score[freq] = 0
+            aggregate_victim_score[freq] = 0
+
     report_out = check_for_2nd_order_intermod(freqs, aggressor_score,
                 victim_score, aggregate_aggressor_score, aggregate_victim_score)
     report_out = check_for_3rd_order_intermod(report_out, freqs, aggressor_score,
                 victim_score, aggregate_aggressor_score, aggregate_victim_score,
                 frequency_label_dict, label_frequencies)
     report_out = report_scores(report_out, freqs, aggressor_score, victim_score,
-                aggregate_aggressor_score, aggregate_victim_score,
                 frequency_label_dict)
-    return(report_out)
+    return(report_out, aggregate_aggressor_score, aggregate_victim_score)
 
 def all_frequencies_kosher(f1, f2, f3):
     """
@@ -129,6 +134,7 @@ def check_for_3rd_order_intermod(report_out, freqs, agg_score, vic_score,
                             else:
                                 agg_score[len(analysis_freqs)-k-1] += 1
     report_out += "</table>"
+    aggregate_scores(freqs, agg_score, vic_score, agg_agg_score, agg_vic_score)
     return(report_out)
 
 def check_for_2nd_order_intermod(freqs, agg_score, vic_score, agg_agg_score,
@@ -167,12 +173,36 @@ def check_for_2nd_order_intermod(freqs, agg_score, vic_score, agg_agg_score,
     return(report_out)
 
 def aggregate_scores(freqs, agg_score, vic_score, agg_agg_score, agg_vic_score):
+    """
+    Aggregate all the aggressor and victim scores so the final aggregate score
+    of all derivative channel plans can be reported after the individual
+    derivative channel plans have been reported.
+
+    Args:
+        freqs(list): List of all the unique frequencies under analysis for a
+            channel plan
+        agg_score(list): List of aggressor scores for each frequency in a
+            channel plan. The list of scores must be aligned with the order
+            of frequencies in freqs.
+        vic_score(list): List of victim scores for each frequency in a
+            channel plan. The list of scores must be aligned with the order
+            of frequencies in freqs.
+        agg_agg_score(dict): Dictionary of aggregate aggressor scores for each
+            frequency in all derivative channel plans. The dict keys are
+            frequencies and the dict values are the aggregate scores.
+        agg_vic_score(dict): Dictionary of aggregate victim scores for each
+            frequency in all derivative channel plans. The dict keys are
+            frequencies and the dict values are the aggregate scores.
+
+    Returns:
+        <NONE>: No return values are needed because the aggregate scores get
+                modified in place via pointers.
+    """
     for i, freq in enumerate(freqs):
         agg_agg_score[freq] += agg_score[i]
         agg_vic_score[freq] += vic_score[i]
 
-def report_scores(report_out, freqs, agg_score, vic_score, agg_agg_score,
-                  agg_vic_score, frequency_label_dict):
+def report_scores(report_out, freqs, agg_score, vic_score, frequency_label_dict):
     """
     Report the total aggressor and victim scores
     """
@@ -210,6 +240,27 @@ def report_scores(report_out, freqs, agg_score, vic_score, agg_agg_score,
                             <td align='right'>{freqs_sorted_by_tot_score[i].total_score} ({round(total_percent)}%)</td></tr>")
     report_out += '</table><hr style="height:6px;background-color:#333;">'
     return(report_out)
+
+def report_aggregate_scores(report_out, agg_agg_score, agg_vic_score):
+    """
+    Report the final aggregrate scores for all frequencies, aggregated from the
+    individual score reports from each derivative channel plan.
+
+    Args:
+        agg_agg_score(dict): Dictionary of aggregate aggressor scores, where
+            the dictionary keys are frequencies.
+        agg_vic_score(dict): Dictionary of aggregate victim scores, where
+            the dictionary keys are frequencies.
+
+    Returns:
+        report_out(string): A string of the entire HTML report output after all
+            the analysis is completed.
+    """
+#
+# NEXT STEP: BUILD HTML REPORT FOR THE FINAL AGGREGATE SCORES ACCUMULATED FROM ALL THE
+# PREVIOUS DERIVATIVE SCORE REPORTS.
+#
+
 
 def append_negs_to_list_of_nums(nums):
     """
