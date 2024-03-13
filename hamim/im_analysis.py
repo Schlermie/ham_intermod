@@ -25,9 +25,13 @@ def analyze(csv_string, label_equations):
             check_for_intermod(unique_freq_list, channel_label_dict, label_equations,
                                aggregate_aggressor_score, aggregate_victim_score)
         analysis_report += analysis_report_addtition
-    analysis_report = report_aggregate_scores(analysis_report,
-                        aggregate_aggressor_score, aggregate_victim_score,
-                        channel_label_dict)
+    #
+    # Only report aggregate scores if there was more than one frequency list
+    #
+    if len(list_of_unique_freq_lists) > 1:
+        analysis_report = report_aggregate_scores(analysis_report,
+                            aggregate_aggressor_score, aggregate_victim_score,
+                            channel_label_dict)
     return(analysis_report)
 
 def report_unique_freqs(freq_list, frequency_label_dict):
@@ -264,7 +268,7 @@ def report_aggregate_scores(report_out, agg_agg_score, agg_vic_score, frequency_
     #
     # Report no aggregate hit scores if there are no aggressors
     #
-    report_out += (f"\n<h3><u>Aggregate Hit Scores</u></h3>")
+    report_out += (f"<h3><u>Aggregate Hit Scores</u></h3>")
     sum_agg_agg_scores = sum(value for value in agg_agg_score.values())
     sum_agg_vic_scores = sum(value for value in agg_vic_score.values())
     if sum_agg_agg_scores == 0:
