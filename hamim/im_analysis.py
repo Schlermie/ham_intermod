@@ -15,13 +15,23 @@ def analyze(csv_string, label_equations):
                                    in the report.
     """
     analysis_report = ""
+    aggregate_aggressor_score = {}
+    aggregate_victim_score = {}
     channel_dict = csv2dict(csv_string)
     list_of_unique_freq_lists, channel_label_dict = channel_dict_to_list_of_freqlists(channel_dict)
     for unique_freq_list in list_of_unique_freq_lists:
         analysis_report += report_unique_freqs(unique_freq_list, channel_label_dict)
-        analysis_report, aggregate_aggressor_score, aggregate_victim_score = \
-            check_for_intermod(unique_freq_list, channel_label_dict, label_equations)
-    analysis_report = report_aggregate_scores(analysis_report, aggregate_aggressor_score, aggregate_victim_score)
+        analysis_report_addtition, aggregate_aggressor_score, aggregate_victim_score = \
+            check_for_intermod(unique_freq_list, channel_label_dict, label_equations,
+                               aggregate_aggressor_score, aggregate_victim_score)
+        analysis_report += analysis_report_addtition
+    #
+    # Only report aggregate scores if there was more than one frequency list
+    #
+    if len(list_of_unique_freq_lists) > 1:
+        analysis_report = report_aggregate_scores(analysis_report,
+                            aggregate_aggressor_score, aggregate_victim_score,
+                            channel_label_dict)
     return(analysis_report)
 
 def report_unique_freqs(freq_list, frequency_label_dict):
@@ -37,15 +47,14 @@ def report_unique_freqs(freq_list, frequency_label_dict):
     report_out += '</table>'
     return(report_out)
 
-def check_for_intermod(freqs, frequency_label_dict, label_frequencies):
+def check_for_intermod(freqs, frequency_label_dict, label_frequencies, 
+                    aggregate_aggressor_score, aggregate_victim_score):
     """
     Scan a list of frequencies to check for combinations that cause intermod
     conflicts
     """
     aggressor_score = [0] * len(freqs)
     victim_score = [0] * len(freqs)
-    aggregate_aggressor_score = {}
-    aggregate_victim_score = {}
     # Initialize aggregate scores to 0 for this set of freqs if not yet
     # initialized previously while working on some other set of freqs.
     for freq in freqs:
@@ -241,7 +250,7 @@ def report_scores(report_out, freqs, agg_score, vic_score, frequency_label_dict)
     report_out += '</table><hr style="height:6px;background-color:#333;">'
     return(report_out)
 
-def report_aggregate_scores(report_out, agg_agg_score, agg_vic_score):
+def report_aggregate_scores(report_out, agg_agg_score, agg_vic_score, frequency_label_dict):
     """
     Report the final aggregrate scores for all frequencies, aggregated from the
     individual score reports from each derivative channel plan.
@@ -256,11 +265,41 @@ def report_aggregate_scores(report_out, agg_agg_score, agg_vic_score):
         report_out(string): A string of the entire HTML report output after all
             the analysis is completed.
     """
-#
-# NEXT STEP: BUILD HTML REPORT FOR THE FINAL AGGREGATE SCORES ACCUMULATED FROM ALL THE
-# PREVIOUS DERIVATIVE SCORE REPORTS.
-#
+    #
+    # Report no aggregate hit scores if there are no aggressors
+    #
+    report_out += (f"<h3><u>Aggregate Hit Scores</u></h3>")
+    sum_agg_agg_scores = sum(value for value in agg_agg_score.values())
+    sum_agg_vic_scores = sum(value for value in agg_vic_score.values())
+    if sum_agg_agg_scores == 0:
+        report_out += (f"No intermod hits found!\n")
+        return(report_out)
+    #
+    # Else total the aggressor and victim scores for each frequency and sort
+    # the list by total score.
+    #
+    freqs_unsorted = []
+    freqs_sorted_by_tot_score = []
+    report_out += "<table>"
+    for freq in agg_agg_score:
+        total_score = agg_agg_score[freq] + agg_vic_score[freq]
+        freqs_unsorted.append(Freq(freq, agg_agg_score[freq], agg_vic_score[freq], total_score))
 
+    freqs_sorted_by_tot_score = sorted(freqs_unsorted, key=lambda x: x.total_score, reverse=True)
+
+    for i in range(0, len(freqs_sorted_by_tot_score)):
+        agg_percent = freqs_sorted_by_tot_score[i].aggressor_score / sum_agg_agg_scores * 100
+        vic_percent = freqs_sorted_by_tot_score[i].victim_score / sum_agg_vic_scores * 100
+        total_percent = freqs_sorted_by_tot_score[i].total_score / (sum_agg_agg_scores + sum_agg_vic_scores) * 100
+        if freqs_sorted_by_tot_score[i].total_score > 0:     # Only print hit score if total_score > 0
+            report_out += (f"<tr><td><b>{freqs_sorted_by_tot_score[i].frequency}</b></td> \
+                            <td><b>({frequency_label_dict[freqs_sorted_by_tot_score[i].frequency]}):</b></td> \
+                            <td>{freqs_sorted_by_tot_score[i].aggressor_score} aggressors ({round(agg_percent)}%),</td> \
+                            <td>{freqs_sorted_by_tot_score[i].victim_score} victims ({round(vic_percent)}%),</td> \
+                            <td>TOTAL SCORE=</td> \
+                            <td align='right'>{freqs_sorted_by_tot_score[i].total_score} ({round(total_percent)}%)</td></tr>")
+    report_out += '</table>'
+    return(report_out)
 
 def append_negs_to_list_of_nums(nums):
     """
